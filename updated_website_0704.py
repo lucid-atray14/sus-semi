@@ -202,7 +202,7 @@ def main():
     df = load_final_database()
     df1 = load_bandgap_database()
     
-    # Professional sidebar navigation
+    # Sidebar navigation
     st.sidebar.title("📊 Material Analysis")
     st.sidebar.markdown("---")
     selected_page = st.sidebar.radio(
@@ -290,16 +290,17 @@ def main():
                     0.0, 15000.0, (0.0, 5000.0),
                     help="Filter materials by CO₂ footprint"
                 )
-                specified_names = [
-                    "Ti1.0O2.0","Zn1.0O1.0","Mo1.0S2.0","C3.0N4.0","C1.0N1.0","Si1.0",
-                    "Ce1.0O2.0","Al2.0O3.0","Si1.0O2.0","Cu1.0O1.0"
-                ]
-                selected_names = st.multiselect(
-                    "Select specific materials",
-                    specified_names,
-                    default=["Ti1.0O2.0", "C3.0N4.0"],
-                    help="Focus on specific materials of interest"
-                )
+            
+            specified_names = [
+                "Ti1.0O2.0","Zn1.0O1.0","Mo1.0S2.0","C3.0N4.0","C1.0N1.0","Si1.0",
+                "Ce1.0O2.0","Al2.0O3.0","Si1.0O2.0","Cu1.0O1.0"
+            ]
+            selected_names = st.multiselect(
+                "Select specific materials",
+                specified_names,
+                default=["Ti1.0O2.0", "C3.0N4.0"],
+                help="Focus on specific materials of interest"
+            )
 
         # Apply filters
         filters = {
