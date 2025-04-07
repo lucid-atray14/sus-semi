@@ -10,6 +10,7 @@ from pymcdm.weights import entropy_weights
 from io import BytesIO
 from bokeh.palettes import Category10
 from bokeh.models import NumeralTickFormatter
+from bokeh.models import LogScale, Range1d, LinearScale
 
 # Custom CSS for styling
 def set_custom_style():
@@ -322,12 +323,12 @@ def main():
         else:
             # Filter out non-positive values if using log scale
             if log_y:
-                filtered_df = filtered_df[filtered_df[y_col] > 0]
+                filtered_df = filtered_df[filtered_df[y_col] > 0]  # Strictly greater than 0
                 if len(filtered_df) == 0:
                     st.warning("⚠️ No materials with positive values for the selected property. Cannot use log scale.")
                     log_y = False
             
-            # Create the plot with maximum width
+            # Create the plot
             p = figure(
                 title=f"Bandgap vs {y_col}",
                 tools="pan,wheel_zoom,box_zoom,reset,save",
@@ -340,10 +341,14 @@ def main():
             
             # Set the scale type properly
             if log_y:
-                from bokeh.models import LogScale, Range1d
-                p.y_range = Range1d(start=filtered_df[y_col].min() * 0.9, 
-                                end=filtered_df[y_col].max() * 1.1)
+                # Calculate proper log range
+                y_min_log = filtered_df[y_col].min() / 10  # One order of magnitude below
+                y_max_log = filtered_df[y_col].max() * 10  # One order of magnitude above
+                
+                p.y_range = Range1d(start=y_min_log, end=y_max_log)
                 p.y_scale = LogScale()
+            else:
+                p.y_scale = LinearScale()  # Explicitly set linear scale
             
             # Plot data
             source = ColumnDataSource(filtered_df)
