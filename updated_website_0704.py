@@ -323,50 +323,52 @@ def main():
         else:
             # Filter out non-positive values if using log scale
             if log_y:
-                filtered_df = filtered_df[filtered_df[y_col] > 0]  # Strictly greater than 0
+                filtered_df = filtered_df[filtered_df[y_col] > 0]  # Strictly positive values
                 if len(filtered_df) == 0:
-                    st.warning("⚠️ No materials with positive values for the selected property. Cannot use log scale.")
+                    st.warning("⚠️ No materials with positive values for selected property. Cannot use log scale.")
                     log_y = False
+            
+            # Create color mapping (do this BEFORE any filtering)
+            name_colors = {name: Category10[len(specified_names)][i] for i, name in enumerate(specified_names)}
+            filtered_df['color'] = filtered_df['Name'].map(name_colors)
             
             # Create the plot
             p = figure(
                 title=f"Bandgap vs {y_col}",
                 tools="pan,wheel_zoom,box_zoom,reset,save",
                 x_axis_label="Bandgap (eV)",
-                y_axis_label=y_col + (" (log scale)" if log_y else ""),
+                y_axis_label=y_col,
                 width=1000,
                 height=600,
                 sizing_mode="stretch_width"
             )
             
-            # Set the scale type properly
+            # Set scale and axis formatting
             if log_y:
-                # Calculate proper log range
-                y_min_log = filtered_df[y_col].min() / 10  # One order of magnitude below
-                y_max_log = filtered_df[y_col].max() * 10  # One order of magnitude above
-                
-                p.y_range = Range1d(start=y_min_log, end=y_max_log)
                 p.y_scale = LogScale()
+                p.yaxis.formatter = NumeralTickFormatter(format="10^[0]")
+                y_min = filtered_df[y_col].min() / 10
+                y_max = filtered_df[y_col].max() * 10
             else:
-                p.y_scale = LinearScale()  # Explicitly set linear scale
+                p.y_scale = LinearScale()
+                y_min = filtered_df[y_col].min() * 0.9
+                y_max = filtered_df[y_col].max() * 1.1
             
-            # Plot data
+            p.y_range = Range1d(start=y_min, end=y_max)
+            
+            # Plot data with consistent colors
             source = ColumnDataSource(filtered_df)
-            p.circle(
-                x="Bandgap", 
-                y=y_col, 
-                source=source, 
+            circles = p.circle(
+                x="Bandgap",
+                y=y_col,
+                source=source,
                 size=12,
-                color='color', 
+                color='color',  # This maintains colors
                 alpha=0.7,
                 legend_field="Name"
             )
             
-            # Calculate y-axis range
-            y_min = filtered_df[y_col].min() * 0.9
-            y_max = filtered_df[y_col].max() * 1.1
-            
-            # Add bandgap regions
+            # Add bandgap regions (works for both linear and log)
             regions = [
                 (0, 1.6, "#f1c40f", "Infrared (0-1.6 eV)"),
                 (1.6, 3.26, "#3498db", "Visible (1.6-3.26 eV)"),
@@ -384,13 +386,17 @@ def main():
                     legend_label=label
                 )
             
-            # Add hover and legend
-            hover = HoverTool(tooltips=[
-                ("Name", "@Name"),
-                ("Bandgap", "@Bandgap{0.00}"),
-                (y_col, f"@{y_col}{{0,0.00}}" if not log_y else f"@{y_col}{{0.0E0}}")
-            ])
+            # Configure hover and legend
+            hover = HoverTool(
+                renderers=[circles],
+                tooltips=[
+                    ("Name", "@Name"),
+                    ("Bandgap", "@Bandgap{0.00} eV"),
+                    (y_col, f"@{y_col}" + ("{0.0E0}" if log_y else "{0.00}"))
+                ]
+            )
             p.add_tools(hover)
+
             p.legend.location = "top_right"
             p.legend.click_policy = "mute"
             p.legend.label_text_font_size = "12pt"
