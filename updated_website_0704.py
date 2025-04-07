@@ -214,7 +214,7 @@ def main():
     # Add footer
     st.markdown("""
     <div class="footer">
-        Material Analysis Platform © 2023 | v1.0 | Developed by Your Team
+        Material Analysis Platform © 2025 | v1.0 | Developed by HERAWS
     </div>
     """, unsafe_allow_html=True)
 
