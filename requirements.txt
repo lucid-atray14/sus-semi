@@ -1,5 +1,5 @@
 streamlit>=1.44.1
-bokeh>=3.0.0
+bokeh==2.4.3
 pandas>=2.2.3
 numpy>=2.2.4
 pymcdm>=1.0.0  # Contains PROMETHEE_II, TOPSIS, entropy_weights
