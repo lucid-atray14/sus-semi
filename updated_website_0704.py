@@ -276,13 +276,13 @@ def main():
                     help="Filter materials by CO₂ footprint"
                 )
                 specified_names = [
-                    "Ti1.0O2.0", "Zn1.0S1.0", "Zn1.0O1.0", "Sn1.0O2.0",
-                    "Cd1.0S1.0", "Si1.0O2.0", "Sb2.0Se3.0", "C3.0N4.0", "Mo1.0S2.0"
+                    "Ti1.0O2.0","Zn1.0O1.0","Mo1.0S2.0","C3.0N4.0","C1.0N1.0","Si1.0",
+                    "Ce1.0O2.0","Al2.0O3.0","Si1.0O2.0","Cu1.0O1.0"
                 ]
                 selected_names = st.multiselect(
                     "Select specific materials",
                     specified_names,
-                    default=["Ti1.0O2.0", "Zn1.0S1.0"],
+                    default=["Ti1.0O2.0", "C3.0N4.0"],
                     help="Focus on specific materials of interest"
                 )
 
