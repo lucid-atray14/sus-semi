@@ -113,49 +113,57 @@ def create_full_output(filtered_df, results_df, weights_df):
     return output.getvalue()
 
 def create_professional_plot(df, x_col, y_col, title, x_label, y_label, log_x=False, log_y=False):
+    # Create a copy to avoid modifying the original dataframe
     df_plot = df.copy()
-    if log_x:
-        df_plot[x_col] = np.log10(df_plot[x_col].clip(lower=1e-10))
-        x_label = f"log({x_label})"
-    if log_y:
-        df_plot[y_col] = np.log10(df_plot[y_col].clip(lower=1e-10))
-        y_label = f"log({y_label})"
     
     # Professional color palette
     primary_color = "#3498db"
     highlight_color = "#e74c3c"
     
+    # Create the figure with dynamic axis types
     p = figure(
         title=title,
         tools="pan,wheel_zoom,box_zoom,reset,save,hover",
-        x_axis_label=x_label,
-        y_axis_label=y_label,
+        x_axis_label=f"log({x_label})" if log_x else x_label,
+        y_axis_label=f"log({y_label})" if log_y else y_label,
+        x_axis_type="log" if log_x else "linear",
+        y_axis_type="log" if log_y else "linear",
         width=800,
         height=500,
-        tooltips=[("Name", "@Name"), (x_col, f"@{x_col}"), (y_col, f"@{y_col}")],
+        tooltips=[("Name", "@Name"), 
+                 (f"log({x_col})" if log_x else x_col, f"@{x_col}"),
+                 (f"log({y_col})" if log_y else y_col, f"@{y_col}")],
         toolbar_location="above",
         sizing_mode="stretch_width"
     )
     
+    # Handle negative/zero values for log scales
+    if log_x:
+        df_plot[x_col] = df_plot[x_col].clip(lower=1e-10)
+    if log_y:
+        df_plot[y_col] = df_plot[y_col].clip(lower=1e-10)
+    
     # Plot all points
+    source = ColumnDataSource(df_plot)
     p.circle(
         x=x_col,
         y=y_col,
-        source=ColumnDataSource(df_plot),
+        source=source,
         size=8,
         color=primary_color,
         alpha=0.6,
         legend_label="All Materials"
     )
     
-    # Highlight exactly 10 random materials (or fewer if less than 10 exist)
+    # Highlight exactly 10 random materials
     num_highlight = min(10, len(df_plot))
-    highlight_df = df_plot.sample(n=num_highlight, random_state=42)  # Fixed random state for reproducibility
+    highlight_df = df_plot.sample(n=num_highlight, random_state=42)
+    highlight_source = ColumnDataSource(highlight_df)
     
     p.circle(
         x=x_col,
         y=y_col,
-        source=ColumnDataSource(highlight_df),
+        source=highlight_source,
         size=12,
         color=highlight_color,
         alpha=1.0,
@@ -167,17 +175,24 @@ def create_professional_plot(df, x_col, y_col, title, x_label, y_label, log_x=Fa
         x=x_col,
         y=y_col,
         text="Name",
-        source=ColumnDataSource(highlight_df),
+        source=highlight_source,
         text_font_size="10pt",
         text_color=highlight_color,
-        y_offset=8
+        y_offset=8,
+        text_align='center'
     )
     p.add_layout(labels)
     
-    # Add professional legend
+    # Professional legend styling
     p.legend.location = "top_right"
     p.legend.click_policy = "hide"
     p.legend.background_fill_alpha = 0.7
+    p.legend.label_text_font_size = "12pt"
+    
+    # Grid and axis styling
+    p.xgrid.grid_line_color = "#e0e0e0"
+    p.ygrid.grid_line_color = "#e0e0e0"
+    p.axis.minor_tick_line_color = None
     
     return p
 
