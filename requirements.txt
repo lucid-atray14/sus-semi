@@ -4,3 +4,4 @@ pandas>=2.2.3
 numpy>=2.2.4
 pymcdm>=1.0.0  # Contains PROMETHEE_II, TOPSIS, entropy_weights
 pillow>=11.1.0  # For BytesIO (if needed)
+openpyxl>=3.1.0
