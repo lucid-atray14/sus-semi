@@ -269,7 +269,6 @@ def main():
                     [col for col in df1.columns if col not in ['Name', 'Bandgap']],
                     help="Select the property to plot against bandgap"
                 )
-                log_y = st.checkbox("Logarithmic Y-axis", False)
                 
             with cols[1]:
                 st.markdown("**Range Filters**")
@@ -321,18 +320,7 @@ def main():
         if len(filtered_df) == 0:
             st.warning("⚠️ No materials match your filters. Please adjust your criteria.")
         else:
-            # Filter out non-positive values if using log scale
-            if log_y:
-                filtered_df = filtered_df[filtered_df[y_col] > 0]  # Strictly positive values
-                if len(filtered_df) == 0:
-                    st.warning("⚠️ No materials with positive values for selected property. Cannot use log scale.")
-                    log_y = False
-            
-            # Create color mapping (do this BEFORE any filtering)
-            name_colors = {name: Category10[len(specified_names)][i] for i, name in enumerate(specified_names)}
-            filtered_df['color'] = filtered_df['Name'].map(name_colors)
-            
-            # Create the plot
+            # Create the plot with maximum width
             p = figure(
                 title=f"Bandgap vs {y_col}",
                 tools="pan,wheel_zoom,box_zoom,reset,save",
@@ -343,32 +331,23 @@ def main():
                 sizing_mode="stretch_width"
             )
             
-            # Set scale and axis formatting
-            if log_y:
-                p.y_scale = LogScale()
-                p.yaxis.formatter = NumeralTickFormatter(format="10^[0]")
-                y_min = filtered_df[y_col].min() / 10
-                y_max = filtered_df[y_col].max() * 10
-            else:
-                p.y_scale = LinearScale()
-                y_min = filtered_df[y_col].min() * 0.9
-                y_max = filtered_df[y_col].max() * 1.1
-            
-            p.y_range = Range1d(start=y_min, end=y_max)
-            
-            # Plot data with consistent colors
+            # Plot data
             source = ColumnDataSource(filtered_df)
-            circles = p.circle(
-                x="Bandgap",
-                y=y_col,
-                source=source,
+            p.circle(
+                x="Bandgap", 
+                y=y_col, 
+                source=source, 
                 size=12,
-                color='color',  # This maintains colors
+                color='color', 
                 alpha=0.7,
                 legend_field="Name"
             )
             
-            # Add bandgap regions (works for both linear and log)
+            # Calculate y-axis range
+            y_min = filtered_df[y_col].min() * 0.9
+            y_max = filtered_df[y_col].max() * 1.1
+            
+            # Add bandgap regions
             regions = [
                 (0, 1.6, "#f1c40f", "Infrared (0-1.6 eV)"),
                 (1.6, 3.26, "#3498db", "Visible (1.6-3.26 eV)"),
@@ -386,17 +365,13 @@ def main():
                     legend_label=label
                 )
             
-            # Configure hover and legend
-            hover = HoverTool(
-                renderers=[circles],
-                tooltips=[
-                    ("Name", "@Name"),
-                    ("Bandgap", "@Bandgap{0.00} eV"),
-                    (y_col, f"@{y_col}" + ("{0.0E0}" if log_y else "{0.00}"))
-                ]
-            )
+            # Add hover and legend
+            hover = HoverTool(tooltips=[
+                ("Name", "@Name"),
+                ("Bandgap", "@Bandgap{0.00}"),
+                (y_col, f"@{y_col}{{0.00}}")
+            ])
             p.add_tools(hover)
-
             p.legend.location = "top_right"
             p.legend.click_policy = "mute"
             p.legend.label_text_font_size = "12pt"
