@@ -38,12 +38,12 @@ def set_custom_style():
     """, unsafe_allow_html=True)
 
 # ===== CACHED FUNCTIONS =====
-@st.cache_data
+#@st.cache_data
 def load_final_database():
     df_original = pd.read_excel("final_database.xlsx")
     return df_original.iloc[:, 1:]
 
-@st.cache_data
+#@st.cache_data
 def load_bandgap_database():
     df1_original = pd.read_excel("bandgap_database.xlsx")
     return df1_original.iloc[:, 1:]
