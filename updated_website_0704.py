@@ -131,9 +131,7 @@ def create_professional_plot(df, x_col, y_col, title, x_label, y_label, log_x=Fa
         y_axis_type="log" if log_y else "linear",
         width=800,
         height=500,
-        tooltips=[("Name", "@Name"), 
-                 (f"log({x_col})" if log_x else x_col, f"@{x_col}"),
-                 (f"log({y_col})" if log_y else y_col, f"@{y_col}")],
+        tooltips=[("Name", "@Name")
         toolbar_location="above",
         sizing_mode="stretch_width"
     )
@@ -367,9 +365,7 @@ def main():
             
             # Add hover and legend
             hover = HoverTool(tooltips=[
-                ("Name", "@Name"),
-                ("Bandgap", "@Bandgap{0.00}"),
-                (y_col, f"@{y_col}{{0.00}}")
+                ("Name", "@Name")
             ])
             p.add_tools(hover)
             p.legend.location = "top_right"
