@@ -131,7 +131,7 @@ def create_professional_plot(df, x_col, y_col, title, x_label, y_label, log_x=Fa
         y_axis_type="log" if log_y else "linear",
         width=800,
         height=500,
-        tooltips=[("Name", "@Name")]
+        tooltips=[("Name", "@Name")],
         toolbar_location="above",
         sizing_mode="stretch_width"
     )
