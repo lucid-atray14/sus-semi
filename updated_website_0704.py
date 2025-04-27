@@ -38,17 +38,17 @@ def set_custom_style():
     """, unsafe_allow_html=True)
 
 # ===== CACHED FUNCTIONS =====
-@st.cache_data
+#@st.cache_data
 def load_final_database():
     df_original = pd.read_excel("final_database.xlsx")
     return df_original.iloc[:, 1:]
 
-@st.cache_data
+#@st.cache_data
 def load_bandgap_database():
     df1_original = pd.read_excel("bandgap_database.xlsx")
     return df1_original.iloc[:, 1:]
 
-@st.cache_data
+#@st.cache_data
 def filter_dataframe(_df, filters, selected_names=None):
     """Filter dataframe based on provided filters and optional names"""
     bandgap_range = filters.get("Bandgap", (_df["Bandgap"].min(), _df["Bandgap"].max()))
@@ -69,23 +69,23 @@ def filter_dataframe(_df, filters, selected_names=None):
         filtered = filtered[filtered["Name"].isin(selected_names)]
     return filtered
 
-@st.cache_data
+#@st.cache_data
 def calculate_weights(matrix, method="entropy"):
     if method == "entropy":
         return entropy_weights(matrix)
     return None
 
-@st.cache_data
+#@st.cache_data
 def run_topsis(matrix, weights, criteria_types):
     topsis = TOPSIS()
     return topsis(matrix, weights, criteria_types)
 
-@st.cache_data
+#@st.cache_data
 def run_promethee(matrix, weights, criteria_types):
     promethee = PROMETHEE_II('usual')
     return promethee(matrix, weights, criteria_types)
 
-@st.cache_data
+#@st.cache_data
 def prepare_plot_data(df, x_col, y_col, log_x=False, log_y=False):
     df_plot = df.copy()
     if log_x:
@@ -94,7 +94,7 @@ def prepare_plot_data(df, x_col, y_col, log_x=False, log_y=False):
         df_plot[y_col] = np.log10(df_plot[y_col].clip(lower=1e-10))
     return df_plot
 
-@st.cache_data
+#@st.cache_data
 def create_full_output(filtered_df, results_df, weights_df):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
