@@ -292,12 +292,12 @@ def main():
                 )
             
                 specified_names = [
-                    "Ti1.0O2.0","Zn1.0O1.0","Cd1.0S1.0","Mo1.0S2.0","Sn1.0O2.0","Zn1.0S1.0","W1.0O3.0","Cu1.0O1.0","Cu2.0O1.0","Si1.0"
+                    "TiO2","ZnO","CdS","MoS2","SnO2","ZnS","WO3","CuO","Cu2O","Si"
                 ]
                 selected_names = st.multiselect(
                     "Select specific materials",
                     specified_names,
-                    default=["Ti1.0O2.0", "Zn1.0O1.0"],
+                    default=["TiO2", "ZnO"],
                     help="Focus on specific materials of interest"
                 )
 
