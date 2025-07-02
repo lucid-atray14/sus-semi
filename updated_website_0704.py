@@ -478,187 +478,188 @@ def main():
                 )
             else:
                 st.warning("No materials match the current filters. Please adjust your criteria.")
+elif selected_page == "MCDM Analysis":
+    st.title("📊 Multi-Criteria Decision Making")
+    st.markdown("Evaluate materials using TOPSIS or PROMETHEE methods")
 
-    elif selected_page == "MCDM Analysis":
-        st.title("📊 Multi-Criteria Decision Making")
-        st.markdown("Evaluate materials using TOPSIS or PROMETHEE methods")
-        
-        # Initialize session state
-        if 'filters' not in st.session_state:
-            st.session_state.filters = {}
-            st.session_state.bandgap_selected = False
-        
-        with st.expander("🔧 Filter Settings", expanded=True):
-            cols = st.columns(2)
-            
-            with cols[0]:
-                st.subheader("Bandgap Selection")
-                fixed_width = st.checkbox("Fixed Width (±0.1 eV)", True, key="mcdm_bandgap")
-                
-                if fixed_width:
-                    center = st.number_input(
-                        "Center Value (eV)", 
-                        min_value=0.0, max_value=20.0, value=2.0, step=0.1, 
-                        key="mcdm_center"
-                    )
-                    bandgap_range = (round(center - 0.1, 1), round(center + 0.1, 1))
-                else:
-                    bandgap_range = st.slider("Custom Range (eV)", 0.0, 20.0, (0.0, 3.0), 0.1, key="mcdm_range")
-                
-                if st.button("Apply Bandgap Filter", key="mcdm_bandgap_filter"):
-                    st.session_state.filters["Bandgap"] = bandgap_range
-                    st.session_state.bandgap_selected = True
-                    st.success("Bandgap filter applied!")
-            
-            with cols[1]:
-                if st.session_state.get('bandgap_selected', False):
-                    st.subheader("Additional Filters")
-                    esg_range = st.slider("ESG Score", 0.0, 5.0, (0.0, 3.5), 0.1, key="mcdm_esg")
-                    toxicity_range = st.slider("Toxicity", 0.0, 4.0, (0.0, 3.0), 1.0, key="mcdm_toxicity")
-                    
-                    production_range = st.slider(
-                        "Production (tons)",
-                        float(df['Production (ton)'].min()),
-                        float(df['Production (ton)'].max()),
-                        (float(df['Production (ton)'].min()), float(df['Production (ton)'].max())),
-                        step=1.0,
-                        key="mcdm_production"
-                    )
-                    
-                    st.session_state.filters.update({
-                        "ESG Score": esg_range,
-                        "Toxicity": toxicity_range,
-                        "Production (ton)": production_range
-                    })
-        
-        if st.session_state.get('bandgap_selected', False):
-            # MCDM configuration
-            st.subheader("⚖️ Analysis Configuration")
-            
-            cols = st.columns(2)
-            with cols[0]:
-                mcdm_method = st.selectbox(
-                    "Method",
-                    ["TOPSIS", "PROMETHEE"],
-                    help="TOPSIS: Technique for Order Preference by Similarity to Ideal Solution\nPROMETHEE: Preference Ranking Organization Method for Enrichment Evaluation"
+    # Initialize session state
+    if 'filters' not in st.session_state:
+        st.session_state.filters = {}
+        st.session_state.bandgap_selected = False
+
+    with st.expander("🔧 Filter Settings", expanded=True):
+        cols = st.columns(2)
+
+        with cols[0]:
+            st.subheader("Bandgap Selection")
+            fixed_width = st.checkbox("Fixed Width (±0.1 eV)", True, key="mcdm_bandgap")
+
+            if fixed_width:
+                center = st.number_input(
+                    "Center Value (eV)",
+                    min_value=0.0, max_value=20.0, value=2.0, step=0.1,
+                    key="mcdm_center"
                 )
-            with cols[1]:
-                if mcdm_method == "TOPSIS":
-                    weighting_method = st.radio(
-                        "Weighting",
-                        ["Entropy Weighting", "Manual Weights"],
-                        horizontal=True
-                    )
-            
-            # Get filtered data
-            filtered_df = filter_dataframe(df, st.session_state.filters)
-            
-            if not filtered_df.empty:
-                st.success(f"🔄 {len(filtered_df)} materials available for analysis")
-                
-                # Criteria selection
-                criteria_options = {
-                    'Reserve (ton)': 1, 'Production (ton)': 1, 'HHI (USGS)': -1,
-                    'ESG Score': -1, 'CO2 footprint max (kg/kg)': -1,
-                    'Embodied energy max (MJ/kg)': -1, 'Water usage max (l/kg)': -1,
-                    'Toxicity': -1, 'Companionality': -1
-                }
-                available_criteria = {k: v for k, v in criteria_options.items() if k in filtered_df.columns}
-                
-                # Weight assignment
-                if mcdm_method == "TOPSIS" and weighting_method == "Entropy Weighting":
-                    weights = entropy_weights(filtered_df[list(available_criteria.keys())].values)
+                bandgap_range = (round(center - 0.1, 1), round(center + 0.1, 1))
+            else:
+                bandgap_range = st.slider("Custom Range (eV)", 0.0, 20.0, (0.0, 3.0), 0.1, key="mcdm_range")
+
+            if st.button("Apply Bandgap Filter", key="mcdm_bandgap_filter"):
+                st.session_state.filters["Bandgap"] = bandgap_range
+                st.session_state.bandgap_selected = True
+                st.success("Bandgap filter applied!")
+
+        with cols[1]:
+            if st.session_state.get('bandgap_selected', False):
+                st.subheader("Additional Filters")
+                esg_range = st.slider("ESG Score", 0.0, 5.0, (0.0, 3.5), 0.1, key="mcdm_esg")
+                toxicity_range = st.slider("Toxicity", 0.0, 4.0, (0.0, 3.0), 1.0, key="mcdm_toxicity")
+
+                production_range = st.slider(
+                    "Production (tons)",
+                    float(df['Production (ton)'].min()),
+                    float(df['Production (ton)'].max()),
+                    (float(df['Production (ton)'].min()), float(df['Production (ton)'].max())),
+                    step=1.0,
+                    key="mcdm_production"
+                )
+
+                st.session_state.filters.update({
+                    "ESG Score": esg_range,
+                    "Toxicity": toxicity_range,
+                    "Production (ton)": production_range
+                })
+
+    if st.session_state.get('bandgap_selected', False):
+        # MCDM configuration
+        st.subheader("⚖️ Analysis Configuration")
+
+        cols = st.columns(2)
+        with cols[0]:
+            mcdm_method = st.selectbox(
+                "Method",
+                ["TOPSIS", "PROMETHEE"],
+                help="TOPSIS: Technique for Order Preference by Similarity to Ideal Solution\nPROMETHEE: Preference Ranking Organization Method for Enrichment Evaluation"
+            )
+        with cols[1]:
+            if mcdm_method == "TOPSIS":
+                weighting_method = st.radio(
+                    "Weighting",
+                    ["Entropy Weighting", "Manual Weights"],
+                    horizontal=True
+                )
+
+        # Get filtered data
+        filtered_df = filter_dataframe(df, st.session_state.filters)
+
+        if not filtered_df.empty:
+            st.success(f"🔄 {len(filtered_df)} materials available for analysis")
+
+            # Criteria selection
+            criteria_options = {
+                'Reserve (ton)': 1, 'Production (ton)': 1, 'HHI (USGS)': -1,
+                'ESG Score': -1, 'CO2 footprint max (kg/kg)': -1,
+                'Embodied energy max (MJ/kg)': -1, 'Water usage max (l/kg)': -1,
+                'Toxicity': -1, 'Companionality': -1
+            }
+            available_criteria = {k: v for k, v in criteria_options.items() if k in filtered_df.columns}
+
+            # Weight assignment
+            if mcdm_method == "TOPSIS" and weighting_method == "Entropy Weighting":
+                weights = entropy_weights(filtered_df[list(available_criteria.keys())].values)
+            else:
+                st.subheader("📊 Criteria Weights")
+                st.markdown("Assign importance to each criterion (0–5 scale):")
+
+                weights = []
+                cols = st.columns(len(available_criteria))
+                for i, (col, direction) in enumerate(available_criteria.items()):
+                    with cols[i]:
+                        weight = st.slider(
+                            f"{col} ({'Max' if direction == 1 else 'Min'})",
+                            0, 5, 3,
+                            key=f"weight_{col}"
+                        )
+                        weights.append(weight)
+
+                # Normalize weights
+                if sum(weights) == 0:
+                    st.warning("All weights set to 0 - using equal weights instead")
+                    weights = np.ones(len(weights)) / len(weights)
                 else:
-                    st.subheader("📊 Criteria Weights")
-                    st.markdown("Assign importance to each criterion (0-5 scale):")
-                    
-                    weights = []
-                    cols = st.columns(len(available_criteria))
-                    for i, (col, direction) in enumerate(available_criteria.items()):
-                        with cols[i]:
-                            weight = st.slider(
-                                f"{col} ({'Max' if direction == 1 else 'Min'})",
-                                0, 5, 3,
-                                key=f"weight_{col}"
-                            )
-                            weights.append(weight)
-                    
-                    # Normalize weights
-                    if sum(weights) == 0:
-                        st.warning("All weights set to 0 - using equal weights instead")
-                        weights = np.ones(len(weights)) / len(weights)
+                    weights = np.array(weights) / sum(weights)
+
+            # Display weights
+            weights_df = pd.DataFrame({
+                'Criterion': list(available_criteria.keys()),
+                'Weight': weights,
+                'Direction': ['Maximize' if d == 1 else 'Minimize' for d in available_criteria.values()]
+            }).sort_values('Weight', ascending=False)
+
+            st.dataframe(
+                weights_df.style.format({'Weight': '{:.2%}'}),
+                use_container_width=True
+            )
+
+            # Run analysis
+            if st.button("🚀 Run Analysis", type="primary"):
+                with st.spinner("Performing analysis..."):
+                    matrix = filtered_df[list(available_criteria.keys())].values
+                    types = np.array([available_criteria[k] for k in available_criteria])
+
+                    if mcdm_method == "TOPSIS":
+                        scores = run_topsis(matrix, weights, types)
+                        ranks = rankdata(scores, reverse=True).astype(int)  # Ensure integer ranks
+                        results = pd.DataFrame({
+                            'Material': filtered_df['Name'],
+                            'Score': scores,
+                            'Rank': ranks
+                        }).sort_values('Rank')
                     else:
-                        weights = np.array(weights) / sum(weights)
-                
-                # Display weights
-                weights_df = pd.DataFrame({
-                    'Criterion': list(available_criteria.keys()),
-                    'Weight': weights,
-                    'Direction': ['Maximize' if d == 1 else 'Minimize' for d in available_criteria.values()]
-                }).sort_values('Weight', ascending=False)
-                
+                        flows = run_promethee(matrix, weights, types)
+                        ranks = rankdata(flows, reverse=True).astype(int)  # Already correctly cast
+                        results = pd.DataFrame({
+                            'Material': filtered_df['Name'],
+                            'Net Flow': flows,
+                            'Rank': ranks
+                        }).sort_values('Rank')
+
+                # Display results
+                st.subheader("📋 Results")
                 st.dataframe(
-                    weights_df.style.format({'Weight': '{:.2%}'}),
+                    results.style.format({
+                        'Score': '{:.2f}',
+                        'Net Flow': '{:.2f}',
+                        'Rank': '{:.0f}'  # Format rank as integer
+                    }),
                     use_container_width=True
                 )
-                
-                # Run analysis
-                if st.button("🚀 Run Analysis", type="primary"):
-                    with st.spinner("Performing analysis..."):
-                        matrix = filtered_df[list(available_criteria.keys())].values
-                        types = np.array([available_criteria[k] for k in available_criteria])
-                        
-                        if mcdm_method == "TOPSIS":
-                            scores = run_topsis(matrix, weights, types)
-                            ranks = rankdata(scores, reverse=True)
-                            results = st.dataframe(
-                                                    results.style.format({
-                                                        'Score': '{:.2f}', 
-                                                        'Net Flow': '{:.2f}',
-                                                        'Rank': '{:.0f}'  # Show rank as whole number
-                                                    }),
-                                                    use_container_width=True
-                                                )
-                        else:
-                            flows = run_promethee(matrix, weights, types)
-                            ranks = rankdata(flows, reverse=True).astype(int) 
-                            results = pd.DataFrame({
-                                'Material': filtered_df['Name'],
-                                'Net Flow': flows,
-                                'Rank': ranks
-                            }).sort_values('Rank')
-                        
-                        # Display results
-                        st.subheader("📋 Results")
-                        st.dataframe(
-                            results.style.format({'Score': '{:.2f}', 'Net Flow': '{:.2f}'}),
-                            use_container_width=True
+
+                # Visualize top materials
+                st.subheader("🏆 Top Materials")
+                top_n = min(3, len(results))
+                top_materials = results.head(top_n)['Material'].tolist()
+
+                cols = st.columns(top_n)
+                for i, material in enumerate(top_materials):
+                    with cols[i]:
+                        st.metric(
+                            label=f"Rank #{int(results.iloc[i]['Rank'])}",  # Show integer rank
+                            value=material,
+                            help=f"Score: {results.iloc[i]['Score'] if 'Score' in results.columns else results.iloc[i]['Net Flow']:.4f}"
                         )
-                        
-                        # Visualize top materials
-                        st.subheader("🏆 Top Materials")
-                        top_n = min(3, len(results))
-                        top_materials = results.head(top_n)['Material'].tolist()
-                        
-                        cols = st.columns(top_n)
-                        for i, material in enumerate(top_materials):
-                            with cols[i]:
-                                st.metric(
-                                    label=f"Rank #{i+1}",
-                                    value=material,
-                                    help=f"Score: {results.iloc[i]['Score'] if 'Score' in results.columns else results.iloc[i]['Net Flow']:.4f}"
-                                )
-                        
-                        # Download results
-                        excel_data = create_full_output(filtered_df, results, weights_df)
-                        st.download_button(
-                            label="📥 Download Full Report",
-                            data=excel_data,
-                            file_name=f"material_analysis_{mcdm_method}.xlsx",
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        )
-            else:
-                st.warning("No materials match the current filters. Please adjust your criteria.")
+
+                # Download results
+                excel_data = create_full_output(filtered_df, results, weights_df)
+                st.download_button(
+                    label="📥 Download Full Report",
+                    data=excel_data,
+                    file_name=f"material_analysis_{mcdm_method}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        else:
+            st.warning("No materials match the current filters. Please adjust your criteria.")
+
 
 if __name__ == "__main__":
     main()
