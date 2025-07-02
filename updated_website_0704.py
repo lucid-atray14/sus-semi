@@ -619,6 +619,7 @@ def main():
                         else:
                             flows = run_promethee(matrix, weights, types)
                             ranks = rankdata(flows, reverse=True)
+                            ranks = np.round(ranks, 0)
                             results = pd.DataFrame({
                                 'Material': filtered_df['Name'],
                                 'Net Flow': flows,
