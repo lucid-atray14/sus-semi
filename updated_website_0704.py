@@ -611,11 +611,14 @@ def main():
                         if mcdm_method == "TOPSIS":
                             scores = run_topsis(matrix, weights, types)
                             ranks = rankdata(scores, reverse=True)
-                            results = pd.DataFrame({
-                                'Material': filtered_df['Name'],
-                                'Score': scores,
-                                'Rank': ranks
-                            }).sort_values('Rank')
+                            results = st.dataframe(
+                                                    results.style.format({
+                                                        'Score': '{:.2f}', 
+                                                        'Net Flow': '{:.2f}',
+                                                        'Rank': '{:.0f}'  # Show rank as whole number
+                                                    }),
+                                                    use_container_width=True
+                                                )
                         else:
                             flows = run_promethee(matrix, weights, types)
                             ranks = rankdata(flows, reverse=True).astype(int) 
