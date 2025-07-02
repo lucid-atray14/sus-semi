@@ -628,7 +628,7 @@ def main():
                         # Display results
                         st.subheader("📋 Results")
                         st.dataframe(
-                            results.style.format({'Score': '{:.4f}', 'Net Flow': '{:.4f}'}),
+                            results.style.format({'Score': '{:.2f}', 'Net Flow': '{:.2f}'}),
                             use_container_width=True
                         )
                         
